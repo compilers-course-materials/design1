@@ -75,7 +75,7 @@ language-specific rules.  For example, consider the examples in `truth.py`.
 Suppose we wanted to support this in a language we were designing that uses
 tagged representations for values.  What impact might that have on our
 representation choices if we wanted to make checking conditionals easy?  What
-if we added more types, for example a special `None` value (like in Python),
+if we added more values, for example a special `None` value (like in Python),
 that makes if take the false branch if it appears in conditional position?  Say
 we used the _two_ least significant bits to represent that tag?  How would
 these choices affect performance relative to C, which treats everything as an
