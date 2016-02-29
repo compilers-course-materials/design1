@@ -282,10 +282,7 @@ let rec acompile_step (s : cexpr) (si : int) (env : (string * int) list) : instr
           ]
         | Print ->
           prelude @ [
-(*            ISub(Reg(ESP), Const(si * 4)); *)
-(*            ISub(Reg(ESP), Sized(DWORD_PTR, Const(8))); *)
-            IPush(Sized(DWORD_PTR, Reg(EAX))); (*
-            IMov(Reg(EBP), Reg(ESP)); *)
+            IPush(Sized(DWORD_PTR, Reg(EAX)));
             ICall("print");
             IPop(Reg(EAX));
           ]
