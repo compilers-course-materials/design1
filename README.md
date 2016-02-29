@@ -15,8 +15,8 @@ in separate files, as well.  All answers are due by Wednesday, March 16, at
 
 ## 1. ANF and If
 
-Consider the alternate version of Boa provided in `if-alternate-anf.ml`.  The
-following changes were made:
+Consider the alternate version of the Cobra compiler provided in
+`if-alternate-anf.ml`.  The following changes were made:
 
 1.  Moved `CIf` to the `aexpr` datatype:
 
@@ -36,14 +36,14 @@ following changes were made:
 
 2.  Changed `acompile_expr`, `count_vars`, etc. in obvious ways
 
-You can copy and paste it into your Boa or Cobra compiler to try it out.
 Answer the following questions:
 
 - Give an English description of no more than two sentences characterizing the
-  difference between the two strategies.
+  difference between this ANF strategy and the original.
 - Can the two strategies ever produce programs that give different answers?
   That is, is the alternate strategy _correct_?  Give an example if there is a
-  difference, and argue why not if not.
+  difference, and argue why not if not.  To be clear, this would mean that a
+  test with `t` or `terr` would succeed on one but fail on the other.
 - What impact does the given transformation have on generated assembly code
   size, compared to the original you were given?  Try to be as precise as
   possible in describing the size increase or decrease.
