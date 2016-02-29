@@ -59,8 +59,8 @@ operator), which has made the implementation quite simple.  This append
 operator takes _O(n)_ time, where `n` is the size of the left-hand operand.
 
 - What does this mean for the complexity of our compiler overall?  For example,
-  (in terms of big-_O_), how many new links are created if we compile a
-  let-expression with 1000 bindings?
+  (roughly) how many new list links are created if we compile a let-expression
+  with 1000 bindings?
 - Is this acceptable performance?  What are some implementation options
   (changing function signatures, changing data structures, etc) for alleviating
   this issue if not?
