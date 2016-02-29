@@ -15,9 +15,10 @@ in separate files, as well.  All answers are due by Wednesday, March 16, at
 
 ## 1. ANF and If
 
-Consider the following changes to ANF:
+Consider the alternate version of Boa provided in `if-alternate-anf.ml`.  The
+following changes were made:
 
-1.  Move `CIf` to the `aexpr` datatype:
+1.  Moved `CIf` to the `aexpr` datatype:
 
     ```
     type aexpr =
@@ -26,14 +27,14 @@ Consider the following changes to ANF:
       | ACExpr of cexpr
     ```
 
-    And change `acompile_expr`, `count_vars`, etc. in the obvious ways
-
-2.  Change the `EIf` case of `anf` to produce `AIf` as follows:
+3.  Changed the `EIf` case of `anf` to produce `AIf` as follows:
  
     ```
     | EIf(cond, thn, els) ->
       anf cond (fun immcond -> AIf(immcond, anf thn k, anf els k))
     ```
+
+2.  Changed `acompile_expr`, `count_vars`, etc. in obvious ways
 
 You can copy and paste it into your Boa or Cobra compiler to try it out.
 Answer the following questions:
@@ -51,50 +52,16 @@ Answer the following questions:
   give an example.  If it cannot, explain why.
 
 
-## 2. If and Effects
+## 2. Compiler Runtime Complexity
 
-Consider this implementation of compiling `CIf`:
-
-```
-    | CIf(cond, thn, els) ->
-      let cond_as_arg = acompile_imm_arg cond si env in
-      let thn_instrs = acompile_expr thn si env in
-      let els_instrs = acompile_expr els si env in
-      let done_label = gen_temp "done" in
-      thn_instrs @ [
-        IMov(Reg(EAX), cond_as_arg);
-        ICmp(Reg(EAX), const_false);
-        IJne(done_label);
-      ] @
-      els_instrs @ [
-        ILabel(done_label)
-      ]
-    | CImmExpr(i) -> acompile_imm i si env
-```
-
-In English, it runs all the instructions for the `then` branch, then checks
-the conditional and skips the instructions for the `else` branch if the
-conditional is not false:
-
-```
-instructions for then
-...
-mov eax, <conditional-value>
-cmp eax, <false>
-jne done
-instructions for else
-...
-done:
-```
-
-You should be able to paste the code above directly into your Cobra compiler
-to try it out.
-
-- Give an example of a Cobra program that behaves differently under the
-  correct version and this version, in a way _other than_ throwing an error
-  because the conditional check is omitted.
-- If we used an analogous strategy for Boa, could we still write a test to
-  distinguish the two implementations?  Why or why not?
+Our compiler generates instruction lists mainly via appending (the `@`
+operator), which has made the implementation quite simple.  This append
+operator takes _O(n)_ time, where `n` is the size of the left-hand operand.
+What does this mean for the complexity of our compiler overall?  For example,
+(in terms of big-_O_), how many new links are created if we compile a
+let-expression with 1000 bindings?  Is this acceptable performance?  What are
+some implementation options (changing function signatures, changing data
+structures, etc) for alleviating this issue if not?
 
 
 ## 3. Tagged Representations and If
