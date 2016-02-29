@@ -1,8 +1,8 @@
 open Printf
 
 type reg =
-	| EAX
-	| ESP
+  | EAX
+  | ESP
   | EBP
 
 
@@ -19,13 +19,14 @@ type arg =
   | Sized of size * arg
 
 type instruction =
-	| IMov of arg * arg
+  | IMov of arg * arg
 
   | IAdd of arg * arg
   | ISub of arg * arg
   | IMul of arg * arg
 
   | IShr of arg * arg
+  | ISar of arg * arg
   | IShl of arg * arg
 
   | IAnd of arg * arg
@@ -36,7 +37,7 @@ type instruction =
   | IPush of arg
   | IPop of arg
   | ICall of string
-	| IRet
+  | IRet
 
   | ICmp of arg * arg
   | IJne of string
@@ -116,16 +117,16 @@ let rec anf e (k : immexpr -> aexpr) =
 
 
 let r_to_asm (r : reg) : string =
-	match r with
-		| EAX -> "eax"
-		| ESP -> "esp"
-		| EBP -> "ebp"
+  match r with
+    | EAX -> "eax"
+    | ESP -> "esp"
+    | EBP -> "ebp"
 
 let s_to_asm (s : size) : string =
-	match s with
-		| DWORD_PTR -> "DWORD"
-		| WORD_PTR -> "WORD"
-		| BYTE_PTR -> "BYTE"
+  match s with
+    | DWORD_PTR -> "DWORD"
+    | WORD_PTR -> "WORD"
+    | BYTE_PTR -> "BYTE"
 
 let rec arg_to_asm (a : arg) : string =
   match a with
@@ -141,25 +142,27 @@ let rec arg_to_asm (a : arg) : string =
       sprintf "%s %s" (s_to_asm s) (arg_to_asm a)
 
 let i_to_asm (i : instruction) : string =
-	match i with
-		| IMov(dest, value) ->
-			sprintf "  mov %s, %s" (arg_to_asm dest) (arg_to_asm value)
-		| IAdd(dest, to_add) ->
-			sprintf "  add %s, %s" (arg_to_asm dest) (arg_to_asm to_add)
-		| ISub(dest, to_sub) ->
-			sprintf "  sub %s, %s" (arg_to_asm dest) (arg_to_asm to_sub)
-		| IMul(dest, to_mul) ->
-			sprintf "  imul %s, %s" (arg_to_asm dest) (arg_to_asm to_mul)
+  match i with
+    | IMov(dest, value) ->
+      sprintf "  mov %s, %s" (arg_to_asm dest) (arg_to_asm value)
+    | IAdd(dest, to_add) ->
+      sprintf "  add %s, %s" (arg_to_asm dest) (arg_to_asm to_add)
+    | ISub(dest, to_sub) ->
+      sprintf "  sub %s, %s" (arg_to_asm dest) (arg_to_asm to_sub)
+    | IMul(dest, to_mul) ->
+      sprintf "  imul %s, %s" (arg_to_asm dest) (arg_to_asm to_mul)
     | IAnd(dest, mask) ->
       sprintf "  and %s, %s" (arg_to_asm dest) (arg_to_asm mask)
     | IOr(dest, mask) ->
       sprintf "  or %s, %s" (arg_to_asm dest) (arg_to_asm mask)
     | IXor(dest, mask) ->
       sprintf "  xor %s, %s" (arg_to_asm dest) (arg_to_asm mask)
-		| IShr(dest, to_shift) ->
-			sprintf "  shr %s, %s" (arg_to_asm dest) (arg_to_asm to_shift)
-		| IShl(dest, to_shift) ->
-			sprintf "  shl %s, %s" (arg_to_asm dest) (arg_to_asm to_shift)
+    | IShr(dest, to_shift) ->
+      sprintf "  shr %s, %s" (arg_to_asm dest) (arg_to_asm to_shift)
+    | ISar(dest, to_shift) ->
+      sprintf "  sar %s, %s" (arg_to_asm dest) (arg_to_asm to_shift)
+    | IShl(dest, to_shift) ->
+      sprintf "  shl %s, %s" (arg_to_asm dest) (arg_to_asm to_shift)
     | ICmp(left, right) ->
       sprintf "  cmp %s, %s" (arg_to_asm left) (arg_to_asm right)
     | IPush(arg) ->
@@ -169,7 +172,7 @@ let i_to_asm (i : instruction) : string =
     | ICall(str) ->
       sprintf "  call %s" str
     | ILabel(name) ->
-			sprintf "%s:" name
+      sprintf "%s:" name
     | IJne(label) ->
       sprintf "  jne near %s" label
     | IJe(label) ->
@@ -180,8 +183,8 @@ let i_to_asm (i : instruction) : string =
       sprintf "  jo near %s" label
     | IJmp(label) ->
       sprintf "  jmp near %s" label
-		| IRet ->
-			"	ret"
+    | IRet ->
+      "  ret"
 
 let to_asm (is : instruction list) : string =
   List.fold_left (fun s i -> sprintf "%s\n%s" s (i_to_asm i)) "" is
@@ -311,9 +314,9 @@ let rec acompile_step (s : cexpr) (si : int) (env : (string * int) list) : instr
           checked @
           [
             IMov(Reg(EAX), left_as_arg);
+            ISar(Reg(EAX), Const(1));
             IMul(Reg(EAX), right_as_arg);
             check_overflow;
-            IShr(Reg(EAX), Const(1));
           ]
         | Less ->
           checked @
@@ -347,7 +350,7 @@ let rec acompile_step (s : cexpr) (si : int) (env : (string * int) list) : instr
     | CImmExpr(i) -> acompile_imm i si env
 
 and acompile_expr (e : aexpr) (si : int) (env : (string * int) list) : instruction list =
-	match e with
+  match e with
     | ALet(id, e, body) ->
       let prelude = acompile_step e (si + 1) env in
       let postlude = acompile_expr body (si + 1) ((id, si)::env) in
@@ -398,5 +401,5 @@ our_code_starts_here:
   @ [ILabel(error_non_bool)] @ (throw_err 2) in
   let compiled = (acompile_expr anfed 1 []) in
   let as_assembly_string = (to_asm (compiled @ postlude)) in
-	sprintf "%s%s\n" prelude as_assembly_string
+  sprintf "%s%s\n" prelude as_assembly_string
 
