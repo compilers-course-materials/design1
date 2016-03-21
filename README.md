@@ -7,10 +7,6 @@ require more than a few hundred words, or about half a page, to answer in
 full.  If you look up external sources to help you answer these questions,
 cite them.
 
-Hand it in electronically by pushing to this repository some obviously-named
-file, like "answers.txt" or "answers.pdf".  Feel free to put separate answers
-in separate files, as well.  All answers are due by Wednesday, March 16, at
-11:59pm.
 
 
 ## 1. ANF and If
